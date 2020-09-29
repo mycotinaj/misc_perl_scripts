@@ -1,0 +1,15 @@
+Purpose: Parse Antismash output as domain counts of clusters.
+
+1. cd to Antismash output folder
+
+2. Concatenate all gene clusters from Antismash output.
+
+cat species_1.cluster* > antismash_cat_species_cluster.gbk
+
+3. Get rough count of cluster types:
+
+awk '{print $4}' geneclusters.txt | sort | uniq -c
+
+4. Print detection features
+
+sed -n -e '/FEATURES/,/cutoff/ p' antismash_cat_species_cluster.gbk
