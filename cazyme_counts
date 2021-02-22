@@ -3,8 +3,8 @@
 
 #  find cazymes with coverage > 0.45 and e-value <1e-17 from proteins.fasta file using hmmer - these parameters are suggested for fungi
 #  this takes about 3-8 hours depending on CAZy content - not sure multiple nodes/tasks if you're running a slurm really helps
+# dbcan was installed in a Conda environment using instructions found here: https://github.com/linnabrown/run_dbcan
 
-source ~/.hmmer
 run_dbcan.py --out_pre yourspecies --hmm_cov 0.45 --hmm_eval 1e-17 --hmm_cpu 12 --db_dir /pl/active/fungi1/dbcan_db/ yourinputfile.proteins.fa protein
 
 #  remove header line
@@ -48,23 +48,6 @@ tac all_cazys_counts_step3.tsv > all_cazys_counts_final.tsv
 
 #  convert to csv - possibly better for R?
 csvtk tab2csv all_cazys_counts_final.tsv > all_cazys_counts_final.csv
-
--------------------------------------------------------------------
-
-#  paste this whole command into your terminal to make the ~/.hmmer file you'll source
-#  you might need to change $USER to your name
-
-echo "# .hmmer
-
-# Source global definitions
-if [ -f /etc/bashrc ]; then
-        . /etc/bashrc
-fi
-
-# User specific aliases and functions
-
-source /projects/caqu8258/software/miniconda2/bin/activate
-source activate hmmer" > /home/$USER/.hmmer
 
 -------------------------------------------------------------------
 
