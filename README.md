@@ -1,10 +1,10 @@
 Sections:
 
-[Assembly](#assembly)
-[Extracting target genome from metagenome](#extracting-target-genome-from-metagenome-with-an-ESOM)
-[Genome Annotation](#genome-annotation)
-[CAZYme Annotation](#cazyme-annotation)
-[Phylogenomics workflow](#phylogenomics-workflow)
+> [Assembly](#assembly)
+> [Extracting target genome from metagenome](#extracting-target-genome-from-metagenome-with-an-ESOM)
+> [Genome Annotation](#genome-annotation)
+> [CAZYme Annotation](#cazyme-annotation)
+> [Phylogenomics workflow](#phylogenomics-workflow)
 
 ***
 
@@ -150,74 +150,98 @@ For more indepth steps and example files, see [Quandt Mycology's Running_ESOM](h
 ## Gene Prediction - [Funannotate](https://funannotate.readthedocs.io/en/latest/) workflow
 
 1. Sort by contigs by size and rename headers
-> funannotate sort -i after_esom_assembly.fasta -o sorted_assembly.fasta -b profar
-
+```
+funannotate sort -i after_esom_assembly.fasta -o sorted_assembly.fasta -b profar
+```
 2. Mask repeats
-> funannotate mask -i sorted_assembly.fasta -o masked_sorted_assembly.fas -s fungi
-
+```
+funannotate mask -i sorted_assembly.fasta -o masked_sorted_assembly.fas -s fungi
+```
 3. Run gene prediction pipeline. ***Protein evidence used for this study***
-> funannotate predict -i masked_sorted_assembly.fas --name IDENTIFIER_ --species "Species name" --augustus_species botrytis_cinerea --protein_evidence /path/to/protein/evidence -o species_funannotate_out --cpus $SLURM_NTASKS 
-
+```
+funannotate predict -i masked_sorted_assembly.fas --name IDENTIFIER_ --species "Species name" --augustus_species botrytis_cinerea --protein_evidence /path/to/protein/evidence -o species_funannotate_out --cpus $SLURM_NTASKS 
+```
 ***
 
 ### CAZyme Annotation
 
 This will identify, filter, and count CAZyme families and subfamilies within a protein fasta with [dbCAN](http://bcb.unl.edu/dbCAN2/download/) and merge results of multiple genomes into a single CSV. This will find cazymes with coverage > 0.45 and e-value <1e-17 from proteins.fasta file using hmmer - these parameters are suggested for fungi.
 
-Input is .proteins.fa file generated from funannotate.
-
+1. Run dbCAN on .proteins.fa file generated from funannotate.
+```
 run_dbcan.py --out_pre yourspecies --hmm_cov 0.45 --hmm_eval 1e-17 --hmm_cpu 12 --db_dir /your/dbcan/database yourinputfile.proteins.fa protein
+```
+2. Remove header line. Use wc -l after this and other steps if you want to check if they worked
+```
+tail -n +2 hmmer.out > hmmer_step1.out
+```
 
-1. Remove header line. Use wc -l after this and other steps if you want to check if they worked
-> tail -n +2 hmmer.out > hmmer_step1.out
+3. Remove all columns except cazy name and gene
+```
+awk '{ print $1, $3}' hmmer_step1.out > hmmer_step2.out
+```
 
-2. Remove all columns except cazy name and gene
-> awk '{ print $1, $3}' hmmer_step1.out > hmmer_step2.out
+4. Remove any duplicate annotations on the same gene
+```
+awk '!x[$0]++' hmmer_step2.out > hmmer_step3.out
+```
 
-3. Remove any duplicate annotations on the same gene
-> awk '!x[$0]++' hmmer_step2.out > hmmer_step3.out
+5. Generate counts of cazys
+```
+awk '{print $1}' hmmer_step3.out | sort | uniq -c > hmmer_step4.out
+```
 
-4. Generate counts of cazys
-> awk '{print $1}' hmmer_step3.out | sort | uniq -c > hmmer_step4.out
- 
-5. swap columns
-> awk ' { t = $1; $1 = $2; $2 = t; print; } ' hmmer_step4.out > hmmer_step5.out
+6. Awap columns
+```
+awk ' { t = $1; $1 = $2; $2 = t; print; } ' hmmer_step4.out > hmmer_step5.out
+```
 
-6. Add species name as column header (format as G.species no space).
-> awk 'BEGIN{print "Species\tG.species"}1' hmmer_step5.out > yourspecies_cazy_counts.out
-
+7. Add species name as column header (format as G.species no space).
+```
+awk 'BEGIN{print "Species\tG.species"}1' hmmer_step5.out > yourspecies_cazy_counts.out
+```
 Once you have all of your yourspecies_cazy_counts.out files, put them into a single folder. The next steps will merge the results into one file. [csvtk](https://bioinf.shenwei.me/csvtk/download/) needs to be installed.
 
 1. Convert *.out files to tab-delimited
-> ls *.out | parallel 'csvtk space2tab {} > {.}.tsv'
-
+```
+ls *.out | parallel 'csvtk space2tab {} > {.}.tsv'
+```
 2. Grab all possible values from the first column
-> cut -f 1 *.tsv | sort | uniq | tee all_cazys_step1.tsv
+```
+cut -f 1 *.tsv | sort | uniq | tee all_cazys_step1.tsv
+```
 
 3. Join files and fill blanks with 0s
-> csvtk join -H -t -k -t *.tsv --na 0 > all_cazys_counts_step2.tsv
-
+```
+csvtk join -H -t -k -t *.tsv --na 0 > all_cazys_counts_step2.tsv
+```
 4. Clean .hmm from final result
-> sed 's/.hmm//' all_cazys_counts_step2.tsv > all_cazys_counts_step3.tsv
+```
+sed 's/.hmm//' all_cazys_counts_step2.tsv > all_cazys_counts_step3.tsv
+```
 
 5. Flip so species names are headers
-> tac all_cazys_counts_step3.tsv > all_cazys_counts_final.tsv 
+```
+tac all_cazys_counts_step3.tsv > all_cazys_counts_final.tsv 
+```
 
 6. Convert to csv - possibly better for R?
-> csvtk tab2csv all_cazys_counts_final.tsv > all_cazys_counts_final.csv
-
-
+```
+csvtk tab2csv all_cazys_counts_final.tsv > all_cazys_counts_final.csv
+```
+```
 Other commands that might help:
 
-Filter by evalue
->awk '$5 < 1e-17 { print $0 }' hmmer.out
+#Filter by evalue
 
-Filter by coverage 
-> awk '$9 > 0.45 { print $0 }' hmmer.out 
+awk '$5 < 1e-17 { print $0 }' hmmer.out
 
-Sum of your cazy counts
-> awk '!x[$0]++' hmmer_step2.out
+#Filter by coverage 
+awk '$9 > 0.45 { print $0 }' hmmer.out 
 
+#Sum of your cazy counts
+awk '!x[$0]++' hmmer_step2.out
+```
 ***
 
 ## Phylogenomics workflow
@@ -225,49 +249,64 @@ Sum of your cazy counts
 1. Change headers in files
 
 For JGI files:
-> cat Amyenc.fas | sed 's/jgi|//g' | sed 's/|/_/g' | sed 's/Amyenc1_/Amyenc|/g' > Amyenc.names.fas
+```
+cat Amyenc.fas | sed 's/jgi|//g' | sed 's/|/_/g' | sed 's/Amyenc1_/Amyenc|/g' > Amyenc.names.fas
+```
 
 For Funannotate proteins.fas:
+```
 cat Nagfri_prots.fas | sed 's/>NAGFRI_/>NAGFRI|g/g' > Nagfri.names.fas
+```
 
 For NCBI-Genbank files. POR is the 3 letter accession.
-
-> cat Tolpar.fas | sed 's/ \[Tolypocladium paradoxum\]//g' | sed 's/>POR/>Tolpar|POR/g' | sed 's/ /_/g' | sed 's/,//g' | sed 's/\///g' | sed 's/(//g' | sed 's/)//g' | sed 's/[][]//g' > Tolpar.names.fas
-
+```
+cat Tolpar.fas | sed 's/ \[Tolypocladium paradoxum\]//g' | sed 's/>POR/>Tolpar|POR/g' | sed 's/ /_/g' | sed 's/,//g' | sed 's/\///g' | sed 's/(//g' | sed 's/)//g' | sed 's/[][]//g' > Tolpar.names.fas
+```
 
 2. Make a new directory and move all renamed files
-> mkdir good_names
-> mv *.names.fas good_names
-> cd good_names
-
+```
+mkdir good_names
+mv *.names.fas good_names
+cd good_names
+```
 3. Get the names of all files in the directory for the next step
-> echo $(dir) 
-
+```
+echo $(dir) 
+```
 4. Run [ProteinOrtho](http://www.bioinf.uni-leipzig.de/Software/proteinortho/)
-> proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
-
+```
+proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
+```
 5. Get single copy, shared orthologous clusters. This example has 3 input proteomes:
-> grep $'^3\t3' protortho_output.tsv > new_all_3.tsv
-
+```
+grep $'^3\t3' protortho_output.tsv > new_all_3.tsv
+```
 6. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl)
-> perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_18.tsv input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
+```
+perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_18.tsv input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
+```
 
 7. Make a new directory and move single copy files
-> mkdir single_copy
-> mv *.fasta single_copy
-> cd single copy
-
-8. Create an lb file from files in this directory for MUSCLE input using (new_create_muscle.sh)(/new_create_muscle.sh)
-> ./new_create_muscle.sh > lb_cmd_file
+```
+mkdir single_copy
+mv *.fasta single_copy
+cd single copy
+```
+8. Create an lb file from files in this directory for MUSCLE input using (new_create_muscle.sh)[/new_create_muscle.sh]
+```
+./new_create_muscle.sh > lb_cmd_file
+```
 
 9. Run [MUSCLE](https://www.drive5.com/muscle/downloads.htm) with [Open MPI](https://www.open-mpi.org/software/ompi/v4.1/). 
-> mpirun lb 
-
+```
+mpirun lb 
+```
 10. Move output files to new directory
-> mkdir muscle_out
-> mv *.fasta.out muscle_out
-> cd muscle_out
-
+```
+mkdir muscle_out
+mv *.fasta.out muscle_out
+cd muscle_out
+```
 11. Create an lb file from files in this directory for trimAl input using 
 
 12. Run trimAl (http://trimal.cgenomics.org/)
