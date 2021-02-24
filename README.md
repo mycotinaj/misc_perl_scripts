@@ -117,19 +117,19 @@ somoclu -e 20 -l 0.5 -L 0.1 -m toroid -r 50 -x 250 -y 200 -v 2 species_300bp.fas
 View -> UMatrix background, tiled display.
 Use Zoom, Color, Bestmatch size to get your desired view.
 
- A. Check "Draw Best Matches" in View pane.
+   A. Check "Draw Best Matches" in View pane.
 
- B. File -> load .cls
+   B. File -> load .cls
  
- C. Under "Classes" tab, select classes to be displayed on the map.
+   C. Under "Classes" tab, select classes to be displayed on the map.
+  
+   D. Once you have identified your target genome, select the "Data" tab. Then, left click around the target area of the map. 
  
- D. Once you have identified your target genome, select the "Data" tab. Then, left click around the target area of the map. 
- 
- E. When you have enclosed all of the target area of the map, right click to select that target area. 
+   E. When you have enclosed all of the target area of the map, right click to select that target area. 
 
  ***This will only work correctly if you have selected the "Data" tab prior to beginning.***
  
- F. File, Selection, save as .cls. Name your selected .cls file to save to your folder. 
+   F. File, Selection, save as .cls. Name your selected .cls file to save to your folder. 
  
 11. Obtain target contigs using [Getclassfasta.pl](Getclassfasta.pl)
 ```
