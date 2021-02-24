@@ -1,4 +1,4 @@
-#Workflow used for Melie, 2021
+Workflow used for Melie, 2021
 
 #### This process is suited for the extraction of genomes from metagenomes. Specifically in situations where pure culture is unable to be grown and sequencing must occur using sporocarp material.
 
@@ -27,7 +27,8 @@ perl remove_small_contigs.pl 300 scaffolds.fasta > species_300bp_spades.fasta
 blastn -query species_300bp_spades.fasta -db /your_db_path -out species_300bp_to_ntdb_E5 -max_target_seqs 1 -evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids" -num_threads 12
 ```
 
-Your best blastn hit could be spurious or as equally likely as the second or fourth best blastn hit, but in aggregate, we try to separate the data. For bacteria, this actually works quite well, for Eukaryotes the databases are sparser and therefore we give a best blastn hit less meaning. A top hit to ANY fungus is usually a definite for our targets, a top hit to animals (especially inverts) could still be a fungal target
+Your best blastn hit could be spurious or as equally likely as the second or fourth best blastn hit, but in aggregate, we try to separate the data. For bacteria, this actually works quite well, for Eukaryotes the databases are sparser and therefore we give a best blastn hit less meaning. A top hit to ANY fungus is usually a definite for our targets, a top hit to animals (especially inverts) could still be a fungal target.
+
 3. Multiple hits will be assigned to each contig, filter the results so only a "best" blast hit is assigned.
 
 ```
@@ -90,7 +91,7 @@ perl print_tetramer_freqs_esom.pl -s species_300bp_spades.fasta -m 300 -w 3000 -
 [Somoclu](https://somoclu.readthedocs.io/en/stable/download.html) is advantageous when you have a large dataset as this can be time and resource-consuming when running locally.
 It can be installed here:
 
-8. Train your ESOM
+8. Train the ESOM
 
 ```
 
@@ -108,7 +109,7 @@ somoclu -e 20 -l 0.5 -L 0.1 -m toroid -r 50 -x 250 -y 200 -v 2 species_300bp.fas
 
 ***Somoclu will number the the .lrn file starting at 1 and the .bm file starting at 0. If you use them as is in ESOM, you will get a message about mismatches in observations when you run the "Getclassfasta" script on your generated .cls file. Renumber the .bm file starting with 1 before importing into ESOM.***
 
-9. Transfer your files to your local computer. Load your .names, .umx, .wts, and fixed .bm file into your [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) GUI. 
+9. Transfer files to your local computer. Load your .names, .umx, .wts, and fixed .bm file into your [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) GUI. 
 
 
 10. Vizualize output locally and identify target genome
@@ -120,7 +121,7 @@ Use Zoom, Color, Bestmatch size to get your desired view.
 
  B. File -> load .cls
  
- C. Under "Classes" tab, select classes you are interested in viewing so that they "light up" on the map.
+ C. Under "Classes" tab, select classes to be displayed on the map.
  
  D. Once you have identified your target genome, select the "Data" tab. Then, left click around the target area of the map. 
  
@@ -130,10 +131,10 @@ Use Zoom, Color, Bestmatch size to get your desired view.
  
  F. File, Selection, save as .cls. Name your selected .cls file to save to your folder. 
  
-11. Obtain your target contigs using [Getclassfasta.pl](Getclassfasta.pl)
+11. Obtain target contigs using [Getclassfasta.pl](Getclassfasta.pl)
 ```
 perl Getclassfasta.pl -fasta species_300bp_spades.fasta -names species_300bp_spades.fasta.names -num 1 -loyal 75 -cls species_300bp_spades.fasta.cls
 ```
-You will now have a .fasta (your new target genome assembly), and a .conf output files. The .conf tells you the confidence at which any given contig was placed within the target genome assembly.
+This will generate a .fasta (your target genome assembly), and a .conf giving confidence values of specific contigs
 
-For more examples and files, see [Quandt Mycology's Running_ESOM](https://github.com/Quandt-Mycology-Lab/Lab_Codes_and_workflows/tree/13a29e99deba6a064015bf7791746de695150d0f/Running_ESOM) page.
+For more indepth steps and example files, see [Quandt Mycology's Running_ESOM](https://github.com/Quandt-Mycology-Lab/Lab_Codes_and_workflows/tree/13a29e99deba6a064015bf7791746de695150d0f/Running_ESOM) page.
