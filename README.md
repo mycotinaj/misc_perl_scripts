@@ -11,7 +11,7 @@ Workflow used for Melie, 2021
 
 ## Extracting target genome from metagenome
 
-###Visualize your data - create an emergent self organizing map (ESOM).### 
+### Visualize your data - create an emergent self organizing map (ESOM).
 
 Modified and emended from the work out of Jill Banfield's lab. Greg Dick et al. 2009 Genome Biology. And Vincent Denef's version of the print_tetramer_freqs.pl perl script has been used.  
 
