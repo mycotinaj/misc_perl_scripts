@@ -99,14 +99,14 @@ perl print_tetramer_freqs_esom.pl -s species_300bp_spades.fasta -m 300 -w 3000 -
 ```
 7. Output, 4 files: .lrn, .names, .cls, .annotation files within your directory. 
 
-[Somoclu](https://somoclu.readthedocs.io/en/stable/download.html) is advantageous when you have a large dataset as this can be time and resource-consuming when running locally.
-It can be installed here:
+***You can run the next step locally with ESOM, however, [Somoclu](https://somoclu.readthedocs.io/en/stable/download.html) is advantageous when you have a large dataset as this can be time and resource-consuming when running locally.***
+
 
 8. Train the ESOM
 
 ```
 
-somoclu -e 20 -l 0.5 -L 0.1 -m toroid -r 50 -x 250 -y 200 -v 2 species_300bp.fasta.lrn species_300bp_spades.fasta
+somoclu -e 20 -l 0.5 -L 0.1 -m toroid -r 50 -x 450 -y 500 -v 2 species_300bp.fasta.lrn species_300bp_spades.fasta
 
 #e = number of epochs
 #l = starting learning rate 
@@ -120,29 +120,39 @@ somoclu -e 20 -l 0.5 -L 0.1 -m toroid -r 50 -x 250 -y 200 -v 2 species_300bp.fas
 
 ***Somoclu will number the the .lrn file starting at 1 and the .bm file starting at 0. If you use them as is in ESOM, you will get a message about mismatches in observations when you run the "Getclassfasta" script on your generated .cls file. Renumber the .bm file starting with 1 before importing into ESOM.***
 
-9. Transfer files to your local computer. Load your .names, .umx, .wts, and fixed .bm file into your [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) GUI. 
+9. Renumbering is easy with awk
+```
+awk 'NR>2 {$1=NR-2}{print}' species_300bp.fasta.bm > renum.species_300bp.fasta.bm
+```
+
+10. Transfer files to your local computer. Load your .names, .umx, .wts, and fixed .bm file into your [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) GUI. 
 
 
-10. Vizualize output locally and identify target genome
+11. Vizualize output locally and identify target genome
 
 View -> UMatrix background, tiled display.
 Use Zoom, Color, Bestmatch size to get your desired view.
 
- A. Check "Draw Best Matches" in View pane.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A. Check "Draw Best Matches" in View pane.
 
- B. File -> load .cls
+  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B. File -> load .cls
  
- C. Under "Classes" tab, select classes to be displayed on the map.
+   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C. Under "Classes" tab, select classes to be displayed on the map.
  
- D. Once you have identified your target genome, select the "Data" tab. Then, left click around the target area of the map. 
  
- E. When you have enclosed all of the target area of the map, right click to select that target area. 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D. Once you have identified your target genome, select the "Data" tab. Then, left click around the target area of the map. 
+ 
+  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E. When you have enclosed all of the target area of the map, right click to select that target area. 
 
  ***This will only work correctly if you have selected the "Data" tab prior to beginning.***
  
- F. File, Selection, save as .cls. Name your selected .cls file to save to your folder. 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;F. File, Selection, save as .cls. Name your selected .cls file to save to your folder. 
  
-11. Obtain target contigs using [Getclassfasta.pl](/Getclassfasta.pl)
+12. Obtain target contigs using [Getclassfasta.pl](/Getclassfasta.pl)
 ```
 perl Getclassfasta.pl -fasta species_300bp_spades.fasta -names species_300bp_spades.fasta.names -num 1 -loyal 75 -cls species_300bp_spades.fasta.cls
 ```
@@ -196,7 +206,7 @@ awk '!x[$0]++' hmmer_step2.out > hmmer_step3.out
 awk '{print $1}' hmmer_step3.out | sort | uniq -c > hmmer_step4.out
 ```
 
-6. Awap columns
+6. Swap columns
 ```
 awk ' { t = $1; $1 = $2; $2 = t; print; } ' hmmer_step4.out > hmmer_step5.out
 ```
