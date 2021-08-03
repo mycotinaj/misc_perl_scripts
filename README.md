@@ -40,7 +40,7 @@ blastn -query species_300bp_spades.fasta -db /your_db_path -out species_300bp_to
 
 Your best blastn hit could be spurious or as equally likely as the second or fourth best blastn hit, but in aggregate, we try to separate the data. For bacteria, this actually works quite well, for Eukaryotes the databases are sparser and therefore we give a best blastn hit less meaning. A top hit to ANY fungus is usually a definite for our targets, a top hit to animals (especially inverts) could still be a fungal target.
 
-3. Multiple hits will be assigned to each contig, filter the results so only a "best" blast hit is assigned.
+3. Multiple hits will be assigned to each contig, filter the results so only a "best" blast hit is assigned. Do this with [best_blast_hit.pl](/best_blast_hit.pl).
 
 ```
 perl best_blast_hit.pl species_300bp_to_ntdb_E5_blast.out > best_species_300bp_to_ntdb_E5_blast.out 
