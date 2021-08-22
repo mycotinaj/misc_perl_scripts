@@ -368,7 +368,7 @@ done
 ```
 3. Run concatenated alignments of genes through RAxML to prepare individual gene trees
 ```
-mpirun lb lb_cmd_raxml
+mpirun lb lb_cmd_astral
 ```
 4. Concatenate all gene trees
 ```
