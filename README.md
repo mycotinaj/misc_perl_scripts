@@ -309,7 +309,7 @@ cd single_copy
 ```
 9. Run [MUSCLE](https://www.drive5.com/muscle/downloads.htm) with [Open MPI](https://www.open-mpi.org/software/ompi/v4.1/). 
 ```
-mpirun lb_cmb_file
+mpirun lb lb_cmb_file
 ```
 10. Move output files to new directory
 ```
