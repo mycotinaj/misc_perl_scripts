@@ -301,7 +301,7 @@ perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_18.tsv input_pr
 ```
 mkdir single_copy
 mv *.fasta single_copy
-cd single copy
+cd single_copy
 ```
 8. Create an lb file from files in this directory for MUSCLE input using [new_create_muscle.sh](/new_create_muscle.sh)
 ```
