@@ -6,7 +6,6 @@
 > 
 > [Gene Prediction](#gene-prediction-with-Funannotate)
 > 
-> [CAZyme Annotation](#cazyme-annotation)
 > 
 > [Phylogenomics workflow](#phylogenomics-workflow)
 
