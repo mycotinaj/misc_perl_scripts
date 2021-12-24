@@ -290,7 +290,7 @@ mpirun lb lb_cmd_astral
 ```
 4. Concatenate all gene trees
 ```
-cat raxml.bootstraps > all_gene_trees.tree
+cat raxml.bipartitions > all_gene_trees.tree
 ```
 5. Run [ASTRAL](https://github.com/smirarab/ASTRAL)
 ```
