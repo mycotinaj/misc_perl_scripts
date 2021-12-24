@@ -295,7 +295,7 @@ cat raxml.bipartitions > all_gene_trees.tre
 5. Optional: Filter gene trees with low support branches using Newick utilities. Example filters anything below 50%. 
 ```
 all_gene_trees.tre 'i & b<=50' o > all_gene_tree_BS50.tre
-
+```
 6. Run [ASTRAL](https://github.com/smirarab/ASTRAL)
 ```
 java -jar astral.5.7.3.jar -i all_gene_trees.tre -o output.tre
