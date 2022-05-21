@@ -211,7 +211,7 @@ proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS input_protein_file
 ```
 grep $'^3\t3' protortho_output.tsv > new_all_3.tsv
 ```
-6. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl)
+6. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl). It's a good idea to take the header from the proteinortho output and include it at the top of your new tsv file. This can speed up the process. 
 ```
 perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_18.tsv input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
 ```
