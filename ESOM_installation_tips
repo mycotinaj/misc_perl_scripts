@@ -1,0 +1,17 @@
+# Tips for installing ESOM
+
+
+# I'm sorry if you're reading this.
+
+# FAQ:
+# How do I open this?
+# After installation, run ~/ESOM/bin/esomana
+
+# Memory error?
+# Edit the java heap space in ~/ESOM/bin/esomstart
+
+# The program runs but there is no GUI
+# I recommend installing JDK 1.5 for this. You can find the link here: https://www.oracle.com/java/technologies/java-archive-javase5-downloads.html
+# Be sure to install ESOM using this version of java.
+# Edit ~/ESOM/bin/esomstart to use the path to this version of java instead
+
