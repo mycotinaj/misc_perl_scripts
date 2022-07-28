@@ -124,7 +124,7 @@ somoclu -e 20 -l 0.5 -L 0.1 -m toroid -r 50 -x 450 -y 500 -v 2 species_300bp.fas
 awk 'NR>2 {$1=NR-2}{print}' species_300bp.fasta.bm > renum.species_300bp.fasta.bm
 ```
 
-10. Transfer files to your local computer. Load your .names, .umx, .wts, and fixed .bm file into your [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) GUI. 
+10. Transfer files to your local computer. Load your .names, .umx, .wts, and fixed .bm file into your [Databionic ESOM Tools](http://databionic-esom.sourceforge.net/) GUI. If you encounter issues with this program, see extra tips [here](/ESOM_installation_tips).
 
 
 11. Vizualize output locally and identify target genome
