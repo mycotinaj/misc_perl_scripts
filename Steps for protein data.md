@@ -1,5 +1,7 @@
 ## Phylogenomics Workflow For Using Protein Data
 
+### This is an older version of the workflow which uses protein data as input. The Phyparts concordance analysis is also not included. I recommend using nucleotide data and the respective workflow instead. 
+
 1. Change headers in files
 
 For JGI files:
