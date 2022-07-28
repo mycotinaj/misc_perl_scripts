@@ -1,3 +1,5 @@
+## IN PROGRESS 7/28/2022
+
 ## Sections:
 
 > [Assembly](#assembly)
@@ -263,9 +265,8 @@ catfasta2phyml.pl -f *fix > sequence.fasta
 raxml-ng --all sequence.fasta --model GTR+G --bs-trees 300
 
 ```
-## Creating a gene trees, running ASTRAL and doing concordance
+## Creating a gene trees and running ASTRAL
 
-Running [ASTRAL](https://github.com/smirarab/ASTRAL)
 ***This process uses the files in trimmed/ to prepare individual gene trees to then estimate a species tree with ASTRAL***
 
 1. Run concatenated alignments of genes through RAxML to prepare individual gene trees
@@ -288,9 +289,41 @@ cat *.support > Astral_in.tre
 nw_ed Astral_in.tre 'i & b<=30' o > Astral_in30.tre
 ```
 
-4. Run ASTRAL
+4. Run [ASTRAL](https://github.com/smirarab/ASTRAL). Output can be visualized as a species coalescent tree. 
 ```
 java -jar /projects/chjo1591/Astral/astral.5.7.8.jar -i Astral_in30.tre -o Astral_out30.tre
 ```
+## Performing and visualizing condordance analysis
+***Your ASTRAL output and .support files will be needed for this
+
+
+1. Astral chooses an arbitrary taxon to root your tree to. It’s recommended that you manually reroot to your outgroup instead.
+
+Example outgroup file:
+```
+Saccharomyces cerevisiae
+```
+Reroot your tree
+```
+reroot_trees.py Astral_30out.tre outgroup.list > rerooted_Astral30.tre
+
+```
+2. Run the Phyparts concordance analysis
+```
+java -jar phyparts-0.0.1-SNAPSHOT-jar-with-dependencies.jar -a 1 -v -d ../support -m rerooted_Astral30.tre -o out
+
+### -a = the type of analysis
+### -v = verbose
+### -m = target "species tree" from ASTRAL
+### -d = directory with gene trees
+```
+
+3. Visualize the results with phypartspiecharts. The number is the orthologous clusters/gene trees. 
+
+```
+phypartspiecharts.py reroot_astral.tre out 84
+```
+
+
 
 
