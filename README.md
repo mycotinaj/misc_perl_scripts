@@ -198,121 +198,99 @@ done
 ```
 
 4. Run protein ortho, 
+
+Run [ProteinOrtho](http://www.bioinf.uni-leipzig.de/Software/proteinortho/)
 ```
-proteinortho *.aa.fasta
+proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS *.aa.fasta
 ```
-5. grep single copy genes and grab proteins from the output
+5. Get single copy, shared orthologous genes. This examples has 114 input genomes.
+Optional: Check for a blank line up top. Remove if necessary with the sed command before grep. 
 ```
 sed -n '1p' myproject.proteinortho.tsv > single_copy_114.tsv
-grep $'^84\t84' myproject.proteinortho.tsv >> single_copy_84.tsv
-```
-
-
-
-2. Make a new directory and move all renamed files
-```
-mkdir good_names
-mv *.names.fas good_names
-cd good_names
-```
-3. Get the names of all files in the directory for the next step
-```
-echo $(dir) 
-```
-4. Run [ProteinOrtho](http://www.bioinf.uni-leipzig.de/Software/proteinortho/)
-```
-proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
-```
-5. Get single copy, shared orthologous clusters. This example has 3 input proteomes:
-```
-grep $'^3\t3' protortho_output.tsv > new_all_3.tsv
-```
+grep $'^114\t84' myproject.proteinortho.tsv > single_copy_114.tsv
+``
 6. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl). It's a good idea to take the header from the proteinortho output and include it at the top of your new tsv file. This can speed up the process. 
 ```
-perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_18.tsv input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
+perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_114.tsv input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
 ```
-7. Make a new directory and move single copy files
+7.  Copy the new single copy files to cds_genes then cd to that directory
 ```
-mkdir single_copy
-mv *.fasta single_copy
-cd single_copy
-```
-8. Create an lb file from files in this directory for MUSCLE input using [new_create_muscle.sh](/new_create_muscle.sh)
-```
-./new_create_muscle.sh > lb_cmd_file
-```
-9. Run [MUSCLE](https://www.drive5.com/muscle/downloads.htm) with [Open MPI](https://www.open-mpi.org/software/ompi/v4.1/). 
-```
-mpirun lb lb_cmb_file
-```
-10. Move output files to new directory
-```
-mkdir muscle_out
-mv *.fasta.out muscle_out
-cd muscle_out
-```
-11. Create an lb file from files in this directory for trimAl input using [create_trimal.sh](/create_trimal.sh)
-```
-./create_trimal.sh > lb_cmd_trimal
-```
-12. Run [trimAl](http://trimal.cgenomics.org/)
-```
-mpirun lb lb_cmd_trimal
-```
-13. Make a new folder and move trimmed files to this directory
-```
-mkdir trimmed
-mv *.out.trim trimmed
-```
-***
-
-### Running [RAxML-NG](https://github.com/amkozlov/raxml-ng)
-1. Create an expected file from your trimmed alignments. Check this output file for the presence of all of your taxa
-```
-cat trimmed/*.fasta.out.trim | grep "^>" | tr "|" "\t" | cut -f 1 | sort | uniq > expected.txt
-```
-2. Concatenate your alignment with [combine_fasaln.pl](/combine_fasaln.pl) and your expected file
-```
-perl ./combine_fasaln_v2019.pl -o allseqs.fas -of fasta -d ./trimmed/ --expected expected.txt
-```
-3. Make a new directory and move your alignment
-```
-mkdir raxmlng
-mv allseqs.fas raxmlng
-cd raxmlng
-```
-4. Run [RAxML-NG](https://github.com/amkozlov/raxml-ng) with WAG model (formerly PROTGAMMAWAG), 200 bs replicates and a seed value of 2 (this is arbitrary and can be changed)
-```
-raxml-ng-mpi --all -msa allseqs.fas --model WAG --opt-model on --seed 2 --bs-trees 200
+mv singlecopy114.tsv.OrthoGroup* cds_genes && cd $_
 ```
 
-### Running [ASTRAL](https://github.com/smirarab/ASTRAL)
-***This process uses the files in trimmed/ to prepare individual gene trees to then estimate a species tree with ASTRAL***
-
-1. Rename fasta headers across alignments in trimmed/
+8. Align the single copy files with MAFFT
 ```
-for filename in *.trim
+for f in *fasta
 do
-    cat "${filename}" | awk -F "|" '{print $1}' > "${filename}.renamed"
+mafft --thread 12 --amino --maxiterate 1000 ${f} > ${f%.fasta}.aln
+done
+
+```
+9. Might as well move the old stuff out of the way
+```
+mkdir protsinglecopy && mv *.fasta $_
+```
+
+10. Using your allcds_dna.fa, back translate to aa using RevTrans. This uses the match name to back translate. RevTrans is easy with a conda installation, but there's also a webserver.
+```
+for f in *aln
+do 
+revtrans.py -match name allcds_dna.fa ${f} > ${f%.aln}.revtrans.fasta
 done
 ```
-2. Create an lb file using [create_astral.sh](/create_astral.sh)
+
+Note: If you encounter any problems from here, it’s because of the uneven sequence count making it “not an alignment”. All sequences must have the same number of bases to be considered an alignment. You can check a single file using this command:
 ```
-./create_astral.sh > lb_cmd_astral
+bioawk -c fastx '{ print $name, length($seq) }' inputfilename
 ```
-3. Run concatenated alignments of genes through RAxML to prepare individual gene trees
+11. Run [trimAl](http://trimal.cgenomics.org/) with gappyout parameter
 ```
-mpirun lb lb_cmd_astral
+for f in *.revtrans.fasta
+do 
+trimal -in ${f} -out ${f%.revtrans}.trim -gappyout
+done
+
 ```
-4. Concatenate all gene trees
+### Creating an ML tree
+
+1. Concatenate your fasta files. Be sure to check your headers here before moving forward
+
 ```
-cat raxml.bipartitions > all_gene_trees.tre
+catfasta2phyml.pl -f *fix > sequence.fasta
 ```
-5. Optional: Filter gene trees with low support branches using Newick utilities. Example filters anything below 50%. 
+2. Run [RAxML-NG](https://github.com/amkozlov/raxml-ng)
+
+raxml-ng --all sequence.fasta --model GTR+G --bs-trees 300
+
 ```
-all_gene_trees.tre 'i & b<=50' o > all_gene_tree_BS50.tre
+## Creating a gene trees, running ASTRAL and doing concordance
+
+Running [ASTRAL](https://github.com/smirarab/ASTRAL)
+***This process uses the files in trimmed/ to prepare individual gene trees to then estimate a species tree with ASTRAL***
+
+1. Run concatenated alignments of genes through RAxML to prepare individual gene trees
 ```
-6. Run [ASTRAL](https://github.com/smirarab/ASTRAL)
+for f in *.trim
+do
+echo “raxml-ng --all ${f} --model GTR+G --bs-trees 100”
+done
+
 ```
-java -jar astral.5.7.3.jar -i all_gene_trees.tre -o output.tre
+2. Concatenate the resulting gene trees and clean up our folder a bit
 ```
+mkdir genetrees && cd $_
+mv ../*.support .
+cat *.support > Astral_in.tre
+```
+
+3. Optional: Filter gene trees with low support branches using Newick utilities. Example filters anything below 30%. See ASTRAL paper for more information.
+```
+nw_ed Astral_in.tre 'i & b<=30' o > Astral_in30.tre
+```
+
+4. Run ASTRAL
+```
+java -jar /projects/chjo1591/Astral/astral.5.7.8.jar -i Astral_in30.tre -o Astral_out30.tre
+```
+
+
