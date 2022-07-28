@@ -209,7 +209,7 @@ proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS *.aa.fasta
 Optional: Check for a blank line up top. Remove if necessary with the sed command before grep. 
 ```
 sed -n '1p' myproject.proteinortho.tsv > single_copy_114.tsv
-grep $'^114\t84' myproject.proteinortho.tsv > single_copy_114.tsv
+grep $'^114\t114' myproject.proteinortho.tsv > single_copy_114.tsv
 ``
 6. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl). It's a good idea to take the header from the proteinortho output and include it at the top of your new tsv file. This can speed up the process. 
 ```
