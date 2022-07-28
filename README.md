@@ -171,28 +171,44 @@ funannotate sort -i after_esom_assembly.fasta -o sorted_assembly.fasta -b profar
 ```
 funannotate mask -i sorted_assembly.fasta -o masked_sorted_assembly.fas -s fungi
 ```
-3. Run gene prediction pipeline. ***Protein evidence used for this study***
+3. Run gene prediction pipeline.
 ```
-funannotate predict -i masked_sorted_assembly.fas --name IDENTIFIER_ --species "Species name" --augustus_species botrytis_cinerea --protein_evidence /path/to/protein/evidence -o species_funannotate_out --cpus $SLURM_NTASKS 
+funannotate predict -i masked_sorted_assembly.fas --name IDENTIFIER_ --species "Species name" --protein_evidence /path/to/protein/evidence -o species_funannotate_out --cpus $SLURM_NTASKS 
 ```
 ***
-
+## This workflow uses nucleotide data (CDS files) as input. This was selected over protein data for the ability 
 ## Phylogenomics Workflow
 
-1. Change headers in files
 
-For JGI files:
+1. Concatenate your original cds files and convert to a one line fasta
 ```
-cat Marbr1_GeneCatalog_proteins_20141203.aa.fasta | sed 's/jgi|//g' | sed 's/|/_/g' | sed 's/Marbr1_/Marbr1|/g' > Marbr1.names.fas
+cat *.fasta | awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);}  END {printf("\n");}' > allcds_dna.fa
 ```
-For Funannotate proteins.fas:
+2. Make a new directory and move your concatenated file
 ```
-cat Nagfri.proteins.fas | sed 's/>NAGFRI_/>NAGFRI|g/g' > Nagfri.proteins_rename.fas
+mkdir cds_genes && mv allcds_dna.fa cds_genes
 ```
-For NCBI-Genbank files. POR is the 3 letter accession.
+3. Translate sequences to aa with EMBOSS
+
 ```
-cat Tolpar.fas | sed 's/ \[Tolypocladium paradoxum\]//g' | sed 's/>POR/>Tolpar|POR/g' | sed 's/ /_/g' | sed 's/,//g' | sed 's/\///g' | sed 's/(//g' | sed 's/)//g' | sed 's/[][]//g' > Tolpar.names.fas
+for f in *.fasta
+do
+~/EMBOSS-6.6.0/emboss/transeq -trim -sequence ${f} -out ${f%.fasta}.preaa.fasta
+done
 ```
+
+4. Run protein ortho, 
+```
+proteinortho *.aa.fasta
+```
+5. grep single copy genes and grab proteins from the output
+```
+sed -n '1p' myproject.proteinortho.tsv > single_copy_114.tsv
+grep $'^84\t84' myproject.proteinortho.tsv >> single_copy_84.tsv
+```
+
+
+
 2. Make a new directory and move all renamed files
 ```
 mkdir good_names
