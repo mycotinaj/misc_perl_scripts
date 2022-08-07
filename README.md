@@ -1,4 +1,4 @@
-## IN PROGRESS 7/28/2022
+## IN PROGRESS 8/7/2022
 
 ## Sections:
 
@@ -210,7 +210,7 @@ Optional: Check for a blank line up top. Remove if necessary with the sed comman
 ```
 sed -n '1p' myproject.proteinortho.tsv > single_copy_114.tsv
 grep $'^114\t114' myproject.proteinortho.tsv > single_copy_114.tsv
-``
+```
 6. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl). It's a good idea to take the header from the proteinortho output and include it at the top of your new tsv file. This can speed up the process. 
 ```
 perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_114.tsv input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
