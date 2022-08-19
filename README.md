@@ -178,7 +178,7 @@ funannotate mask -i sorted_assembly.fasta -o masked_sorted_assembly.fas -s fungi
 funannotate predict -i masked_sorted_assembly.fas --name IDENTIFIER_ --species "Species name" --protein_evidence /path/to/protein/evidence -o species_funannotate_out --cpus $SLURM_NTASKS 
 ```
 ***
-## This workflow uses nucleotide data (CDS files) as input. This was selected over protein data for the ability 
+## This workflow uses nucleotide data (CDS files) as input.
 ## Phylogenomics Workflow
 
 
