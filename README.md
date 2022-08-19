@@ -210,10 +210,14 @@ Run [ProteinOrtho](http://www.bioinf.uni-leipzig.de/Software/proteinortho/)
 proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS *.aa.fasta
 ```
 6. Get single copy, shared orthologous genes. This examples has 114 input genomes.
-Optional: Check for a blank line up top. Remove if necessary with the sed command before grep. 
+
 ```
-sed -n '1p' myproject.proteinortho.tsv > single_copy_114.tsv
-grep $'^114\t114' myproject.proteinortho.tsv > single_copy_114.tsv
+grep $'^114\t114' > single_copy_114.tsv
+```
+Alternative: Check for a blank line up top. Use this command to remove if necessary with the sed command before grep. 
+```
+sed -n '1p' myproject.proteinortho.tsv | grep $'^114\t114' > single_copy_114.tsv
+
 ```
 7. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl). It's a good idea to take the header from the proteinortho output and include it at the top of your new tsv file. This can speed up the process. 
 ```
