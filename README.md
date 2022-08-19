@@ -1,5 +1,3 @@
-## IN PROGRESS 8/7/2022
-
 ## Sections:
 
 > [Assembly](#assembly)
