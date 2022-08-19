@@ -260,7 +260,7 @@ bioawk -c fastx '{ print $name, length($seq) }' inputfilename
 1. Concatenate your fasta files. Be sure to check your headers here before moving forward
 
 ```
-catfasta2phyml.pl -f *fix > sequence.fasta
+catfasta2phyml.pl -f *trim > sequence.fasta
 ```
 2. Run [RAxML-NG](https://github.com/amkozlov/raxml-ng)
 ```
