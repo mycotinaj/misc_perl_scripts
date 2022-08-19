@@ -241,17 +241,19 @@ revtrans.py -match name allcds_dna.fa ${f} > ${f%.aln}.revtrans.fasta
 done
 ```
 
-Note: If you encounter any problems from here, it’s because of the uneven sequence count making it “not an alignment”. All sequences must have the same number of bases to be considered an alignment. You can check a single file using this command:
-```
-bioawk -c fastx '{ print $name, length($seq) }' inputfilename
-```
+
 11. Run [trimAl](http://trimal.cgenomics.org/) with gappyout parameter
 ```
 for f in *.revtrans.fasta
 do 
-trimal -in ${f} -out ${f%.revtrans}.trim -gappyout
+trimal -in ${f} -out ${f%.revtrans}.trim
 done
 
+```
+
+Note: If you encounter any problems from here, it’s because of the uneven sequence count making it “not an alignment”. All sequences must have the same number of bases to be considered an alignment. You can check a single file using this command:
+```
+bioawk -c fastx '{ print $name, length($seq) }' inputfilename
 ```
 ### Creating an ML tree
 
@@ -261,7 +263,7 @@ done
 catfasta2phyml.pl -f *fix > sequence.fasta
 ```
 2. Run [RAxML-NG](https://github.com/amkozlov/raxml-ng)
-
+```
 raxml-ng --all sequence.fasta --model GTR+G --bs-trees 300
 
 ```
