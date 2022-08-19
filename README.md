@@ -198,29 +198,35 @@ do
 ~/EMBOSS-6.6.0/emboss/transeq -trim -sequence ${f} -out ${f%.fasta}.preaa.fasta
 done
 ```
-
-4. Run protein ortho, 
+4. EMBOSS stubbornly adds as "_1" to each fasta header. I haven't found a way to turn this off. It will cause issues downstream if it's not removed.
+```
+for f in *.aln;
+do
+sed -i 's/T1_1/T1/g' $f; 
+done
+```
+5. Run protein ortho, 
 
 Run [ProteinOrtho](http://www.bioinf.uni-leipzig.de/Software/proteinortho/)
 ```
 proteinortho -clean -project=project_name -cpus=$SLURM_NTASKS *.aa.fasta
 ```
-5. Get single copy, shared orthologous genes. This examples has 114 input genomes.
+6. Get single copy, shared orthologous genes. This examples has 114 input genomes.
 Optional: Check for a blank line up top. Remove if necessary with the sed command before grep. 
 ```
 sed -n '1p' myproject.proteinortho.tsv > single_copy_114.tsv
 grep $'^114\t114' myproject.proteinortho.tsv > single_copy_114.tsv
 ```
-6. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl). It's a good idea to take the header from the proteinortho output and include it at the top of your new tsv file. This can speed up the process. 
+7. Grab proteins from files with [src_proteinortho_grab_proteins.pl](src_proteinortho_grab_proteins.pl). It's a good idea to take the header from the proteinortho output and include it at the top of your new tsv file. This can speed up the process. 
 ```
 perl ./src_proteinortho_grab_proteins.pl -exact -tofiles new_all_114.tsv input_protein_file_1.fas input_protein_file_2.fas input_protein_file_3.fas
 ```
-7.  Copy the new single copy files to cds_genes then cd to that directory
+8.  Move the new single copy files to cds_genes then cd to that directory
 ```
 mv singlecopy114.tsv.OrthoGroup* cds_genes && cd $_
 ```
 
-8. Align the single copy files with MAFFT
+9. Align the single copy files with MAFFT
 ```
 for f in *fasta
 do
@@ -228,12 +234,12 @@ mafft --thread 12 --amino --maxiterate 1000 ${f} > ${f%.fasta}.aln
 done
 
 ```
-9. Might as well move the old stuff out of the way
+10. Might as well move the old stuff out of the way
 ```
 mkdir protsinglecopy && mv *.fasta $_
 ```
 
-10. Using your allcds_dna.fa, back translate to aa using RevTrans. This uses the match name to back translate. RevTrans is easy with a conda installation, but there's also a webserver.
+11. Using your allcds_dna.fa, back translate to aa using RevTrans. This uses the match name to back translate. RevTrans is easy with a conda installation, but there's also a webserver.
 ```
 for f in *aln
 do 
@@ -242,7 +248,7 @@ done
 ```
 
 
-11. Run [trimAl](http://trimal.cgenomics.org/) with gappyout parameter
+12. Run [trimAl](http://trimal.cgenomics.org/) with gappyout parameter
 ```
 for f in *.revtrans.fasta
 do 
