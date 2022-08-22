@@ -283,7 +283,7 @@ raxml-ng --all sequence.fasta --model GTR+G --bs-trees 300
 ```
 for f in *.trim
 do
-echo 'raxml-ng --all ${f} --model GTR+G --bs-trees 100'
+echo raxml-ng --all ${f} --model GTR+G --bs-trees 100
 done
 
 ```
