@@ -301,7 +301,7 @@ nw_ed Astral_in.tre 'i & b<=30' o > Astral_in30.tre
 
 4. Run [ASTRAL](https://github.com/smirarab/ASTRAL). Output can be visualized as a species coalescent tree. 
 ```
-java -jar /projects/chjo1591/Astral/astral.5.7.8.jar -i Astral_in30.tre -o Astral_out30.tre
+java -jar astral.5.7.8.jar -i Astral_in30.tre -o Astral_out30.tre
 ```
 ## Performing and visualizing condordance analysis
 ***Your ASTRAL output and .support files will be needed for this
